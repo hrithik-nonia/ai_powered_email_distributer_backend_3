@@ -13,6 +13,8 @@ from app.utility.authentication_helper import (
     TokenVerificationError,
 )
 from app.utility.token_blacklist import AccessTokenBlacklist
+from typing import Callable
+
 
 logger = logging.getLogger(__name__)
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -25,7 +27,7 @@ def _unauthorized(detail: str) -> HTTPException:
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-
+# get current_user function is used to retrieve the current authenticated user based on the provided bearer token. It checks the validity of the token, verifies it, and retrieves the user information from either Redis cache or MongoDB. If the token is invalid, expired, or revoked, it raises an HTTP 401 Unauthorized exception.
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
 ) -> dict:
@@ -73,3 +75,18 @@ async def get_current_user(
     )
 
     return user
+
+
+# require_role function is a dependency that checks if the current authenticated user has one of the specified roles. It retrieves the current user using the get_current_user function and verifies their role. If the user's role does not match any of the required roles, it raises an HTTP 403 Forbidden exception.
+def require_role(*roles: str) -> Callable:
+    async def dependency(
+        current_user: dict = Depends(get_current_user),
+    ) -> dict:
+        user_role = current_user.get("role")
+        if user_role not in roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Access denied. Required role: {', '.join(roles)}",
+            )
+        return current_user
+    return dependency
