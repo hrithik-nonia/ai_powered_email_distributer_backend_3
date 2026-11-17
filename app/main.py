@@ -17,6 +17,7 @@ from app.redis import ping_redis, close_redis, redis_client
 from app.routes.auth import router as auth_router
 from app.routes.accounts import router as accounts_router
 from app.routes.threads import router as threads_router
+from app.routes.ai import router as ai_router
 from app.routes.threads import start_write_behind_worker
 
 logger = logging.getLogger(__name__)
@@ -111,6 +112,8 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(accounts_router)
 app.include_router(threads_router)
+app.include_router(ai_router)
+
 
 @app.get("/")
 async def root():
