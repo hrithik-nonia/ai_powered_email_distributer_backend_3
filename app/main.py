@@ -13,6 +13,8 @@ from app.database import (
 )
 from app.redis import ping_redis, close_redis, redis_client
 
+from app.routes.auth import router as auth_router
+
 logger = logging.getLogger(__name__)
 
 
@@ -93,6 +95,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# include routers
+app.include_router(auth_router)
 
 
 @app.get("/")
