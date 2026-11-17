@@ -1,5 +1,6 @@
 import logging
 from contextlib import asynccontextmanager
+import asyncio
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,6 +17,7 @@ from app.redis import ping_redis, close_redis, redis_client
 from app.routes.auth import router as auth_router
 from app.routes.accounts import router as accounts_router
 from app.routes.threads import router as threads_router
+from app.routes.threads import start_write_behind_worker
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +91,12 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+# start the write-behind worker for threads
+@app.on_event("startup")
+async def startup():
+    print("Starting write-behind worker for threads...")
+    asyncio.create_task(start_write_behind_worker())
 
 app.add_middleware(
     CORSMiddleware,

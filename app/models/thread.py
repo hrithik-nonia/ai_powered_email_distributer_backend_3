@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Literal
 from datetime import datetime
 
 
@@ -53,3 +53,16 @@ class StatsResponse(BaseModel):
     waiting: int
     meetings: int
     important: int
+
+
+class LabelUpdate(BaseModel):
+    label: Literal["assistant_reply", "client_reply", "no_reply", "needs_review"]
+
+class ReadUpdate(BaseModel):
+    is_read: bool
+
+class StatusUpdate(BaseModel):
+    status: Literal["open", "done"]
+
+class ClientAction(BaseModel):
+    action: Literal["handled", "take_over"]
