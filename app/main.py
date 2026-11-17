@@ -19,6 +19,8 @@ from app.routes.accounts import router as accounts_router
 from app.routes.threads import router as threads_router
 from app.routes.ai import router as ai_router
 from app.routes.drafts import router as drafts_router
+from app.routes.activity import router as activity_router
+
 
 from app.routes.threads import start_write_behind_worker
 
@@ -116,6 +118,7 @@ app.include_router(accounts_router)
 app.include_router(threads_router)
 app.include_router(ai_router)
 app.include_router(drafts_router)
+app.include_router(activity_router)
 
 
 @app.get("/")
