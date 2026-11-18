@@ -22,7 +22,7 @@ class DraftRequest(BaseModel):
 @router.post("/classify/{thread_id}")
 async def reclassify_thread(
     thread_id: str,
-    current_user: dict = Depends(require_role("assistant"))
+    current_user: dict = Depends(require_role("assistant", "client"))
 ):
     """
     Re-classify any thread using Grok AI.
@@ -46,7 +46,7 @@ async def reclassify_thread(
 @router.post("/chat")
 async def ask_ai(
     body: ChatRequest,
-    current_user: dict = Depends(require_role("assistant"))
+    current_user: dict = Depends(require_role("assistant", "client"))
 ):
     """
     Ask anything about your inbox.
@@ -74,7 +74,7 @@ async def ask_ai(
 async def generate_reply_draft(
     thread_id: str,
     body: DraftRequest,
-    current_user: dict = Depends(require_role("assistant"))
+    current_user: dict = Depends(require_role("assistant", "client"))
 ):
     """
     Generate a professional reply draft for any thread.

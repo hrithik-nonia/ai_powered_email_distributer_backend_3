@@ -208,6 +208,14 @@ async def login(payload: UserLogin, response: Response):
     if not valid:
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
+    # ── Role check ──────────────────────────────────────────────
+    if payload.role and user["role"] != payload.role:
+        raise HTTPException(
+            status_code=403,
+            detail=f"This account is registered as '{user['role']}'. Please login with the correct role."
+        )
+    # ────────────────────────────────────────────────────────────
+
     user_id = str(user.get("_id") or user.get("id"))
     access_token = AuthenticationHelper.create_access_token(
         user_id=user_id, email=user["email"], role=user["role"]
@@ -215,7 +223,7 @@ async def login(payload: UserLogin, response: Response):
     refresh_token, jti, refresh_expires = AuthenticationHelper.create_refresh_token(
         user_id=user_id, email=user["email"], role=user["role"]
     )
-    
+
     # store access token for revocation check
     access_jti = AuthenticationHelper.get_jti_from_token(access_token)
     if access_jti:
@@ -247,7 +255,6 @@ async def login(payload: UserLogin, response: Response):
         token_type="bearer",
         user=user_response,
     )
-
 
 # ─── Refresh ───
 @router.post("/refresh", response_model=TokenResponse)

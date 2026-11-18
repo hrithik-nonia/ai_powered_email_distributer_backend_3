@@ -56,10 +56,8 @@ async def create_draft(
     serialized = _serialize(doc)
 
     # Redis: draft cache + list invalidate
-    redis = await redis_client
-    if redis:
-        await redis.setex(DRAFT_KEY(serialized["id"]), DRAFT_TTL, json.dumps(serialized))
-        await redis.delete(USER_DRAFTS_KEY(str(user["_id"])))
+    await redis_client.setex(DRAFT_KEY(serialized["id"]), DRAFT_TTL, json.dumps(serialized))
+    await redis_client.delete(USER_DRAFTS_KEY(str(user["_id"])))
 
     return {"success": True, "data": serialized}
 
@@ -100,8 +98,7 @@ async def list_drafts(
     result = {"drafts": drafts, "total": total, "skip": skip, "limit": limit}
 
     # Cache store
-    if use_cache and redis:
-        await redis.setex(USER_DRAFTS_KEY(user_id), DRAFT_TTL, json.dumps(result))
+    await redis_client.setex(USER_DRAFTS_KEY(user_id), DRAFT_TTL, json.dumps(result))
 
     return {"success": True, "data": result}
 
@@ -139,8 +136,7 @@ async def get_draft(
 
     serialized = _serialize(doc)
 
-    if redis:
-        await redis.setex(DRAFT_KEY(draft_id), DRAFT_TTL, json.dumps(serialized))
+    await redis_client.setex(DRAFT_KEY(draft_id), DRAFT_TTL, json.dumps(serialized))
 
     return {"success": True, "data": serialized}
 
@@ -176,10 +172,9 @@ async def update_draft(
     serialized = _serialize(updated)
 
     # Redis refresh
-    redis = await redis_client
-    if redis:
-        await redis.setex(DRAFT_KEY(draft_id), DRAFT_TTL, json.dumps(serialized))
-        await redis.delete(USER_DRAFTS_KEY(str(user["_id"])))
+    
+    await redis_client.setex(DRAFT_KEY(draft_id), DRAFT_TTL, json.dumps(serialized))
+    await redis_client.delete(USER_DRAFTS_KEY(str(user["_id"])))
 
     return {"success": True, "data": serialized}
 
@@ -206,9 +201,7 @@ async def delete_draft(
     await drafts_collection.delete_one({"_id": oid})
 
     # Redis cleanup
-    redis = await redis_client
-    if redis:
-        await redis.delete(DRAFT_KEY(draft_id))
-        await redis.delete(USER_DRAFTS_KEY(str(user["_id"])))
+    await redis_client.delete(DRAFT_KEY(draft_id))
+    await redis_client.delete(USER_DRAFTS_KEY(str(user["_id"])))
 
     return {"success": True, "message": "Draft deleted successfully"}

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Literal
+from typing import Literal, Optional
 from pydantic import BaseModel, EmailStr, field_validator
 
 
@@ -82,3 +82,9 @@ class LoginResponse(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+    
+    
+class UserLogin(BaseModel):
+    email: str
+    password: str
+    role: Optional[str] = None  # "client" ya "assistant"
